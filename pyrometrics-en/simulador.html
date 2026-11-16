@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Simulator · Pyrometrics</title><link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet"><link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="assets/estilo.css"></head><body><canvas id="cielo" aria-hidden="true"></canvas><header id="top"></header><main><div class="wrap"><h1>Simulator: experiment vs. model</h1>
+<p class="muted">Real data from investigation PSI-117 (n-alkane droplets, cool flames in microgravity). The file does not state the time units, so they are shown as “time (file units)”.</p>
+<div class="split"><div><div class="card"><h3>Chart</h3><div class="row"><button class="chip" data-k="d2">Droplet d²</button><button class="chip" data-k="df">Flame diameter</button><button class="chip" data-k="q">Radiated power Q</button></div>
+<label for="w0">Window start: <span id="v0"></span></label><input type="range" id="w0" min="0" max="100" value="0"><label for="w1">Window end: <span id="v1"></span></label><input type="range" id="w1" min="0" max="100" value="100">
+<div id="stats" style="margin-top:12px;font-size:.9rem"></div><p class="muted" id="nota" style="font-size:.82rem"></p></div></div>
+<div><canvas class="g" id="cv" width="760" height="380" role="img" aria-label="Chart of experimental and model data"></canvas><div class="row" id="leyenda" style="margin-top:8px;font-size:.85rem"></div></div></div>
+<div class="card" style="margin-top:16px"><h2>Report or theory</h2><label for="ti">Title</label><input id="ti" maxlength="120" placeholder="E.g.: On the slope of d² in the initial window">
+<label for="rep">Text</label><textarea id="rep" rows="9" placeholder="Write your analysis, hypothesis or theory…"></textarea>
+<div class="row" style="margin-top:10px"><button class="btn ghost" onclick="insertar()">Insert current results</button><button class="btn" onclick="guardar()">Save to my account</button><button class="btn ghost" onclick="dl('md')">Download .md</button><button class="btn ghost" onclick="dl('txt')">Download .txt</button><button class="btn" onclick="publicar()">Publish for comments</button></div></div>
+<div class="card"><h2>Researcher community</h2><p class="muted" style="font-size:.9rem">Theories published by Premium users. Comment respectfully and cite data; you can report inappropriate comments.</p><div id="com"></div></div></div>
+</main><script src="assets/app.js"></script><script>
+const B='datos/PSI-117/05_datos_separados/';
+const DS={d2:{n:'Droplet d²',y:'d² (mm²)',s:[['Experiment',B+'exp_diametro2_vs_tiempo.csv','p'],['CFD model (1 atm, d₀ = 4 mm)',B+'modelo_1atm_do4mm_diametro2.csv','l']],nota:'Slope of d² in the window: in the d² law, d² decreases linearly and its slope is the burning-rate constant K (mm² per file time unit).'},
+ df:{n:'Flame diameter',y:'diameter (mm)',s:[['Experiment',B+'exp_diametro_llama_vs_tiempo.csv','p'],['CFD model',B+'modelo_1atm_do4mm_diametro_llama.csv','l']],nota:'The model’s maximum is far higher than the experimental one; clarify with the source what that value corresponds to before interpreting it.'},
+ q:{n:'Radiated power Q',y:'Q (W)',s:[['Exp. series A',B+'exp_Q_serie_A.csv','p'],['Exp. series B',B+'exp_Q_serie_B.csv','p'],['CFD model',B+'modelo_1atm_do4mm_radiancia_Q.csv','l']],nota:'The two experimental series carry no labels identifying them; they are called A and B as in the file.'}};
+const COL=['#fffff0','#7994b9','#4f8bff'];let tab='d2',TM=1,CACHE={};
+async function csv(u){if(CACHE[u])return CACHE[u];const t=await (await fetch(u)).text();return CACHE[u]=t.trim().split('\n').slice(1).map(l=>l.split(',').map(Number)).filter(r=>r.length>1&&!isNaN(r[0])&&!isNaN(r[1]))}
+function reg(P){const n=P.length;if(n<3)return null;let sx=0,sy=0,sxy=0,sxx=0;P.forEach(([x,y])=>{sx+=x;sy+=y;sxy+=x*y;sxx+=x*x});const d=n*sxx-sx*sx;return d?(n*sxy-sx*sy)/d:null}
+async function pintar(){const D=DS[tab],S=await Promise.all(D.s.map(s=>csv(s[1])));TM=Math.max(...S.map(p=>Math.max(...p.map(r=>r[0]))));
+ const a=+$('w0').value*TM/100,b=+$('w1').value*TM/100,t0=Math.min(a,b),t1=Math.max(a,b);$('v0').textContent=t0.toFixed(1);$('v1').textContent=t1.toFixed(1);
+ const c=$('cv'),x=c.getContext('2d'),W=c.width,H=c.height,m={l:60,r:16,t:14,b:44};let ym=Math.max(...S.map(p=>Math.max(...p.map(r=>r[1])))),yn=Math.min(0,...S.map(p=>Math.min(...p.map(r=>r[1]))));
+ const X=v=>m.l+v/TM*(W-m.l-m.r),Y=v=>H-m.b-(v-yn)/(ym-yn||1)*(H-m.t-m.b);x.clearRect(0,0,W,H);x.font='13px Noto Sans,sans-serif';
+ x.fillStyle='rgba(26,79,156,.28)';x.fillRect(X(t0),m.t,X(t1)-X(t0),H-m.t-m.b);
+ x.strokeStyle='rgba(121,148,185,.35)';x.fillStyle='#c9d6ea';for(let i=0;i<=5;i++){const gy=yn+(ym-yn)*i/5,gx=TM*i/5;x.beginPath();x.moveTo(m.l,Y(gy));x.lineTo(W-m.r,Y(gy));x.stroke();x.fillText(gy.toFixed(1),6,Y(gy)+4);x.fillText(gx.toFixed(0),X(gx)-8,H-m.b+18)}
+ x.fillText('time (file units)',W/2-60,H-8);x.save();x.translate(14,H/2+30);x.rotate(-Math.PI/2);x.fillText(D.y,0,0);x.restore();
+ S.forEach((P,i)=>{x.strokeStyle=x.fillStyle=COL[i%3];if(D.s[i][2]==='l'){x.lineWidth=2;x.beginPath();P.forEach((r,j)=>j?x.lineTo(X(r[0]),Y(r[1])):x.moveTo(X(r[0]),Y(r[1])));x.stroke()}else P.forEach(r=>{x.beginPath();x.arc(X(r[0]),Y(r[1]),3,0,6.3);x.fill()})});
+ $('leyenda').innerHTML=D.s.map((s,i)=>`<span style="color:${COL[i%3]}">${s[2]==='l'?'━':'●'} ${esc(s[0])}</span>`).join('');
+ STATS=D.s.map((s,i)=>{const P=S[i].filter(r=>r[0]>=t0&&r[0]<=t1);return{n:s[0],k:P.length,sl:reg(P),mx:P.length?Math.max(...P.map(r=>r[1])):null,mean:P.length?P.reduce((q,r)=>q+r[1],0)/P.length:null}});WIN=[t0,t1];
+ $('stats').innerHTML='<table style="min-width:0;font-size:.82rem"><tr><th>Series</th><th>Points</th><th>'+(tab==='d2'?'Slope (K = −slope)':'Max. / mean')+'</th></tr>'+STATS.map(s=>`<tr><td>${esc(s.n)}</td><td>${s.k}</td><td>${tab==='d2'?(s.sl==null?'—':(-s.sl).toFixed(3)):(s.mx==null?'—':s.mx.toFixed(2)+' / '+s.mean.toFixed(2))}</td></tr>`).join('')+'</table>';$('nota').textContent=D.nota}
+let STATS=[],WIN=[0,0];
+document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{tab=b.dataset.k;pintar()});$('w0').oninput=$('w1').oninput=pintar;
+function insertar(){const D=DS[tab];$('rep').value+=`\n\n## Results (${D.n})\nTime window: ${WIN[0].toFixed(1)} to ${WIN[1].toFixed(1)} (file units, no unit stated).\n`+STATS.map(s=>`- ${s.n}: ${s.k} points; ${tab==='d2'?'K = '+(s.sl==null?'n/a':(-s.sl).toFixed(3))+' mm² per time unit':'max '+(s.mx==null?'n/a':s.mx.toFixed(2))+', mean '+(s.mean==null?'n/a':s.mean.toFixed(2))}`).join('\n')+'\nSource: PSI-117, Analyzed_Data_MST_2024_Burning_history_Flame_diameter.csv\n'}
+function dl(e){const t=$('rep').value;if(!t.trim())return toast('No text');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([($('ti').value?'# '+$('ti').value+'\n\n':'')+t],{type:'text/plain;charset=utf-8'}));a.download='pyrometrics-report.'+e;a.click()}
+async function guardar(){const t=$('rep').value.trim();if(!t)return toast('Write something first');const r=await api('save',{kind:'rep',ref:($('ti').value||'report').slice(0,60),title:$('ti').value||'Untitled report',body:t});toast(r.error||'Saved to your account')}
+async function publicar(){const r=await api('theory_add',{title:$('ti').value,body:$('rep').value});if(r.error)return toast(r.error);toast('Published');comunidad()}
+async function comunidad(){const L=await api('theories');if(!Array.isArray(L))return;const me=USER?.id,adm=USER?.admin;
+ $('com').innerHTML=L.map(t=>`<div class="card" data-t="${t.id}"><h3>${esc(t.title)}</h3><div class="muted" style="font-size:.85rem">${esc(t.author)} · ${new Date(t.ts*1000).toLocaleDateString('en-US')} · ${t.n} comments</div><p style="white-space:pre-wrap">${esc(t.body)}</p><div class="cs"></div>
+ <form class="row" style="margin-top:8px"><input class="grow" maxlength="1000" placeholder="Write a comment…" aria-label="Comment"><button class="btn">Comment</button>${t.user==me||adm?'<button type="button" class="btn danger" data-del="1">Delete theory</button>':''}</form></div>`).join('')||'<p class="muted">No theories published yet. Be the first.</p>';
+ document.querySelectorAll('[data-t]').forEach(async el=>{cargaCom(el)})}
+async function cargaCom(el){const id=el.dataset.t,L=await api('comments',{theory:id});el.querySelector('.cs').innerHTML=(L||[]).map(c=>`<div class="cm"><b>${esc(c.author)}</b> <span class="muted" style="font-size:.8rem">${new Date(c.ts*1000).toLocaleString('en-US')}</span><div style="white-space:pre-wrap">${esc(c.body)}</div><button class="btn danger" data-rep="${c.id}">Report</button> ${c.user==USER?.id||USER?.admin?`<button class="btn danger" data-cd="${c.id}">Delete</button>`:''}</div>`).join('')}
+$('com').addEventListener('submit',async e=>{e.preventDefault();const el=e.target.closest('[data-t]'),i=e.target.querySelector('input');const r=await api('comment_add',{theory:el.dataset.t,body:i.value});if(r.error)return toast(r.error);i.value='';cargaCom(el)});
+$('com').addEventListener('click',async e=>{const el=e.target.closest('[data-t]');if(!el)return;const b=e.target;
+ if(b.dataset.rep){await api('comment_report',{id:b.dataset.rep});toast('Report sent')}
+ if(b.dataset.cd){await api('comment_del',{id:b.dataset.cd});cargaCom(el)}
+ if(b.dataset.del&&confirm('Delete this theory and its comments?')){await api('theory_del',{id:el.dataset.t});comunidad()}});
+(async()=>{await init('simulador');pintar();comunidad()})();
+</script></body></html>
