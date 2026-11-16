@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Account · Pyrometrics</title><link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet"><link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="assets/estilo.css"></head><body><canvas id="cielo" aria-hidden="true"></canvas><header id="top"></header><main><div class="wrap" style="max-width:980px"><div id="auth" hidden><div class="card" style="max-width:460px;margin:20px auto"><div class="row"><button class="chip" id="tl">Sign in</button><button class="chip" id="tr">Create account</button></div>
+<form id="f"><div id="nm" hidden><label for="n">Name (optional)</label><input id="n" maxlength="40" autocomplete="name"></div><label for="e">Email</label><input id="e" type="email" required autocomplete="email"><label for="p">Password (minimum 8 characters)</label><input id="p" type="password" required minlength="8" autocomplete="current-password">
+<label id="ac" hidden style="display:none;gap:8px;align-items:flex-start"><input type="checkbox" id="a" style="width:auto;margin-top:5px"><span>I accept the <a href="terminos.html" target="_blank">privacy notice and terms</a>.</span></label>
+<p class="err" id="er"></p><button class="btn" style="width:100%" id="sb">Sign in</button></form><p class="muted" style="font-size:.85rem">Creating an account includes a 1-month trial of Compare and Simulator.</p></div></div>
+<div id="app" hidden><h1>My account</h1><div class="card"><div id="est"></div><div class="row" style="margin-top:10px"><button class="btn ghost" onclick="portal()">Manage subscription</button><button class="btn ghost" onclick="salir()">Sign out</button></div></div>
+<h2>Premium plans</h2><p class="muted">Include Compare and Simulator (with community). The AI chat needs no plan.</p>
+<div class="grid"><div class="card"><h3>Weekly</h3><div style="font-size:1.8rem">$39 MXN</div><p class="muted">Premium access for one week, for specific projects or investigations.</p><button class="btn" onclick="pagar('semanal')">Choose weekly</button></div>
+<div class="card"><h3>Monthly</h3><div style="font-size:1.8rem">$149 MXN</div><p class="muted">Premium access for one month, for students and researchers who use the platform regularly.</p><button class="btn" onclick="pagar('mensual')">Choose monthly</button></div>
+<div class="card"><h3>Yearly</h3><div style="font-size:1.8rem">$1,499 MXN</div><p class="muted">Premium access for one year, at a discounted price compared to monthly billing.</p><button class="btn" onclick="pagar('anual')">Choose yearly</button></div></div>
+<h2>My saved items</h2><div class="card" id="gd">Loading…</div></div></div>
+</main><script src="assets/app.js"></script><script>
+let reg=false;const next=new URLSearchParams(location.search).get('next');
+function modo(r){reg=r;$('nm').hidden=!r;$('ac').style.display=r?'flex':'none';$('sb').textContent=r?'Create account':'Sign in';$('p').autocomplete=r?'new-password':'current-password'}
+$('tl').onclick=()=>modo(false);$('tr').onclick=()=>modo(true);
+$('f').onsubmit=async e=>{e.preventDefault();$('er').textContent='';const r=await api(reg?'register':'login',{email:$('e').value,pass:$('p').value,name:$('n').value,acepto:$('a').checked});
+ if(r.error){$('er').textContent=r.error;return}location.href=next&&/^[a-z]+\.html$/.test(next)?next:'cuenta.html'};
+const FECHA=t=>new Date(t*1000).toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'});
+async function pagar(p){const r=await api('checkout',{plan:p});r.url?location.href=r.url:toast(r.error)}
+async function portal(){const r=await api('portal');r.url?location.href=r.url:toast(r.error)}
+async function salir(){await api('logout');location.href='index.html'}
+async function guardados(){const L=await api('saved');$('gd').innerHTML=(L||[]).map(s=>`<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0"><span><b>${{inv:'Research',cmp:'Comparison',rep:'Report'}[s.kind]}</b> · ${esc(s.title)}</span><span><button class="btn ghost" style="padding:4px 12px" data-o="${s.id}">View</button> <button class="btn danger" data-u="${s.id}">Remove</button></span></div>`).join('')||'<span class="muted">You haven’t saved anything yet.</span>';window._L=L}
+$('gd').onclick=async e=>{const o=e.target.dataset.o,u=e.target.dataset.u;if(u){await api('unsave',{id:u});guardados()}if(o){const s=_L.find(x=>x.id==o);if(s.kind==='inv')location.href='investigacion.html';else{const w=open('','_blank');w.document.write('<pre style="white-space:pre-wrap;font:15px system-ui">'+esc(s.title+'\n\n'+s.body)+'</pre>')}}};
+(async()=>{await init('cuenta');if(new URLSearchParams(location.search).get('pago')==='ok')toast('Payment received. Your access activates in a few seconds; reload the page.');
+ if(!USER){$('auth').hidden=false;if(next)modo(false);return}$('app').hidden=false;
+ const a=ACCESO;$('est').innerHTML=`<h3>${esc(USER.email)}</h3>`+(a.tipo==='pago'?`<p class="ok">Subscription active until ${FECHA(a.hasta)}.</p>`:a.tipo==='prueba'?`<p class="ok">Free trial active until ${FECHA(a.hasta)}.</p>`:'<p class="err">Your trial has ended. Choose a plan to use Compare and the Simulator.</p>');guardados()})();
+</script></body></html>
