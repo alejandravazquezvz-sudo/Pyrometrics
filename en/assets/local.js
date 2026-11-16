@@ -6,6 +6,7 @@
 const EN=document.documentElement.lang==='en',BASE=EN?'../':'';
 const T=(es,en)=>EN?en:es;
 const PAGOS={semanal:'',mensual:'',anual:''}; // pega aquí tus Payment Links de Stripe (https://buy.stripe.com/...) para activar cobros
+const DEMO={email:'demo@pyrometrics.mx',pass:'Demo-Pyro-2026',name:'Usuario demo'}; // cuenta de demostración: acceso Premium sin vencimiento
 const LS={get(k,d){try{const v=localStorage.getItem('pyro:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('pyro:'+k,JSON.stringify(v))}catch(e){}}};
 const now=()=>Math.floor(Date.now()/1000);
 async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('pyro|'+s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
@@ -61,14 +62,16 @@ const kf=q=>norm(q).replace(/[^a-z0-9 ]/g,'').trim();
 const SEED=EN?['What is a cool flame?','What changed in the porosity of hydrated cement in microgravity?','How does droplet extinction behave in microgravity?','What does ozone do in small droplets?','What is the three-stage burning with helium?']:['¿Qué es una llama fría?','¿Qué cambió en la porosidad del cemento hidratado en microgravedad?','¿Cómo se comporta la extinción de gotas en microgravedad?','¿Qué hace el ozono en gotas pequeñas?','¿Qué es la quema en tres estadios con helio?'];
 
 const H={
- async me(){const u=cur();return{user:pub(u),premium:true,acceso:u?{tipo:'prueba',hasta:u.ts+30*86400}:{}}},
+ async me(){const u=cur();return{user:pub(u),premium:true,acceso:u?(u.email===DEMO.email?{tipo:'pago',hasta:4102444800}:{tipo:'prueba',hasta:u.ts+30*86400}):{}}},
  async register(b){const email=(b.email||'').trim().toLowerCase();
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return{error:T('Correo no válido.','Invalid email.')};
   if((b.pass||'').length<8)return{error:T('La contraseña debe tener al menos 8 caracteres.','Password must be at least 8 characters.')};
   if(!b.acepto)return{error:T('Debes aceptar el aviso de privacidad y los términos.','You must accept the privacy notice and terms.')};
   const us=LS.get('users',{});if(us[email])return{error:T('Ese correo ya tiene cuenta.','That email already has an account.')};
   us[email]={id:nid('user'),email,name:(b.name||'').trim().slice(0,40),h:await sha(b.pass),ts:now()};LS.set('users',us);LS.set('ses',email);return{ok:1}},
- async login(b){const email=(b.email||'').trim().toLowerCase(),u=LS.get('users',{})[email];
+ async login(b){const email=(b.email||'').trim().toLowerCase();
+  if(email===DEMO.email){const us=LS.get('users',{});if(!us[email]){us[email]={id:nid('user'),email,name:DEMO.name,h:await sha(DEMO.pass),ts:now()};LS.set('users',us)}}
+  const u=LS.get('users',{})[email];
   if(!u||u.h!==await sha(b.pass||''))return{error:T('Correo o contraseña incorrectos.','Wrong email or password.')};LS.set('ses',email);return{ok:1}},
  async logout(){LS.set('ses',null);return{ok:1}},
  async checkout(b){const l=PAGOS[b.plan];return l?{url:l}:{error:T('Los pagos aún no están habilitados en esta versión.','Payments are not enabled in this version yet.')}},
