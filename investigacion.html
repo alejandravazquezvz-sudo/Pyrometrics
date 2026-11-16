@@ -1,0 +1,27 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Investigación · Pyrometrics</title><link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet"><link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="assets/estilo.css"></head><body><canvas id="cielo" aria-hidden="true"></canvas><header id="top"></header><main><div class="wrap"><h1>Investigaciones</h1>
+<div class="row" style="margin-bottom:16px"><form class="grow" onsubmit="event.preventDefault();pintar()" role="search"><input id="q" type="search" placeholder="Buscar por palabra clave, área o tema" aria-label="Buscar" oninput="pintar()"></form>
+<label style="margin:0"><input type="checkbox" id="sg" style="width:auto" onchange="pintar()"> Solo guardadas</label><a class="btn ghost" href="comparar.html">Comparaciones</a><a class="btn ghost" href="simulador.html">Modelo interactivo</a></div>
+<div class="tw"><table><thead><tr><th style="width:18%">Investigación</th><th style="width:10%">Área</th><th style="width:9%">Tipo</th><th>Objetivo</th><th>Research Impacts / Earth Benefits</th></tr></thead><tbody id="tb"></tbody></table></div>
+<p class="muted" id="pista" style="text-align:center;margin:14px">Selecciona una fila para ver su detalle.</p>
+<div id="panel" hidden>
+<div class="card"><h3>Detalles</h3><div id="cuando"></div></div>
+<div class="card"><h3>Créditos</h3><div id="cred"></div></div>
+<div class="grid"><div class="card"><h3>Breve biografía</h3><div id="bio" style="white-space:pre-line"></div></div><div class="card"><h3>Objetivo</h3><div id="obj" style="white-space:pre-line"></div></div><div class="card"><h3>Misión</h3><div id="mis" style="white-space:pre-line"></div></div></div>
+<div class="grid" style="margin-top:16px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))"><div class="card tree"><h3>Árbol de puntos con hipervínculo</h3><div id="arb"></div></div>
+<div class="card"><h3>Sinopsis</h3><div id="sin" style="white-space:pre-line"></div><div class="row" style="margin-top:12px"><button class="btn ghost" id="bia">Resumir</button><button class="btn" id="bgu">Guardar investigación</button></div></div></div></div></div>
+</main><script src="assets/local.js"></script><script src="assets/app.js"></script><script src="data.js"></script><script>
+let cur=null,GUARD=new Set();const D=window.DATOS||[];
+function pintar(){const q=$('q').value.toLowerCase(),sg=$('sg').checked;$('tb').innerHTML=D.filter(i=>(!sg||GUARD.has(i.id))&&JSON.stringify(i).toLowerCase().includes(q)).map(i=>`<tr tabindex="0" data-id="${i.id}"><td><b>${esc(i.id)}</b><br>${esc(i.titulo||'')}${GUARD.has(i.id)?' <span class="muted">· guardada</span>':''}</td><td>${esc(i.area||'—')}</td><td>${esc(i.tipo||'—')}</td><td><div class="clamp">${esc(i.objetivo||'—')}</div></td><td><div class="clamp">${esc(i.impactos||'—')}</div></td></tr>`).join('')||'<tr><td colspan=5>Sin resultados.</td></tr>'}
+const nodo=n=>`<li>${n.url?`<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.titulo)}</a>`:`<b>${esc(n.titulo)}</b>`}${n.hijos&&n.hijos.length?'<ul>'+n.hijos.map(nodo).join('')+'</ul>':''}</li>`;
+function abrir(id){if(cur&&cur.id===id&&!$('panel').hidden){$('panel').hidden=true;$('pista').hidden=false;cur=null;return}
+ cur=D.find(x=>x.id===id);const i=cur;$('panel').hidden=false;$('pista').hidden=true;
+ $('cuando').textContent=i.cuando||'Sin información';$('cred').innerHTML=(i.creditos||[]).map(p=>`<div>${esc([p.nombre,p.rol,p.institucion].filter(Boolean).join(' — '))}</div>`).join('')||'<span class="muted">Sin créditos registrados</span>';
+ $('bio').textContent=i.biografia||'Sin información';$('obj').textContent=i.objetivo||'Sin información';$('mis').textContent=i.mision||'Sin información';
+ $('arb').innerHTML='<ul>'+(i.arbol||[]).map(nodo).join('')+'</ul>';$('sin').textContent=i.sinopsis||'Sin sinopsis. Usa «Resumir».';
+ $('bgu').textContent=GUARD.has(id)?'Quitar de guardadas':'Guardar investigación';$('panel').scrollIntoView({behavior:'smooth'})}
+$('tb').onclick=e=>{const r=e.target.closest('tr');r&&r.dataset.id&&abrir(r.dataset.id)};$('tb').onkeydown=e=>{if(e.key==='Enter'&&e.target.dataset.id)abrir(e.target.dataset.id)};
+$('bia').onclick=async()=>{if(!cur)return;$('sin').textContent='Generando resumen…';const r=await api('summarize',{id:cur.id,title:cur.titulo});$('sin').innerHTML=r.error?esc(r.error):esc(r.text).replace(/\[(\d+)\]/g,(m,n)=>{const s=(r.sources||[]).find(x=>x.n==n);return s?`<a href="${esc(s.url)}" target="_blank" rel="noopener">[${n}]</a>`:m})};
+$('bgu').onclick=async()=>{if(!cur)return;if(GUARD.has(cur.id)){const l=await api('saved');const s=(l||[]).find(x=>x.kind==='inv'&&x.ref===cur.id);if(s)await api('unsave',{id:s.id});GUARD.delete(cur.id);toast('Quitada de guardadas')}
+ else{const r=await api('save',{kind:'inv',ref:cur.id,title:cur.id+' · '+(cur.titulo||''),body:''});if(r.error)return toast(r.error);GUARD.add(cur.id);toast('Investigación guardada')}$('bgu').textContent=GUARD.has(cur.id)?'Quitar de guardadas':'Guardar investigación';pintar()};
+(async()=>{await init('investigacion');pintar();if(USER){const l=await api('saved');(Array.isArray(l)?l:[]).filter(x=>x.kind==='inv').forEach(x=>GUARD.add(x.ref));pintar()}})();
+</script></body></html>

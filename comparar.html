@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Comparar · Pyrometrics</title><link href="https://fonts.googleapis.com/css2?family=Fjalla+One&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet"><link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="assets/estilo.css"></head><body><canvas id="cielo" aria-hidden="true"></canvas><header id="top"></header><main><div class="wrap"><h1>Comparar investigaciones</h1><p class="muted">Elige 2 o 3 investigaciones. Se usan solo los metadatos y sinopsis de cada investigación. Con temas muy distintos, es normal que casi no haya puntos en común.</p>
+<div class="split"><div class="card"><h3>Selecciona tus investigaciones</h3><div id="lst"></div><button class="btn" style="margin-top:12px;width:100%" id="go" onclick="comparar()">Comparar</button></div>
+<div><div class="card" id="res">Marca al menos 2 investigaciones y pulsa Comparar.</div>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))"><div class="card"><h3>Esquema visual</h3><div id="arb">—</div></div><div class="card"><h3>Similitudes y diferencias</h3><div id="ven">—</div></div></div>
+<button class="btn ghost" id="gcmp" hidden onclick="guardar()">Guardar comparación en mi cuenta</button></div></div></div>
+</main><script src="assets/local.js"></script><script src="assets/app.js"></script><script src="data.js"></script><script>
+let ULT=null,IDS=[];const D=window.DATOS||[];
+function lista(){$('lst').innerHTML=D.map(i=>`<label style="display:flex;gap:8px;align-items:flex-start;margin:8px 0"><input type="checkbox" style="width:auto;margin-top:5px" value="${i.id}"><span><b>${esc(i.id)}</b><br><span class="muted" style="font-size:.85rem">${esc(i.titulo||'')}</span></span></label>`).join('')}
+async function comparar(){IDS=[...document.querySelectorAll('#lst input:checked')].map(x=>x.value);if(IDS.length<2)return toast('Elige al menos 2');
+ $('go').disabled=true;$('res').textContent='Analizando…';const r=await api('compare',{ids:IDS});$('go').disabled=false;if(r.error){$('res').textContent=r.error;return}
+ ULT=r;$('gcmp').hidden=false;$('res').innerHTML='<h3>Resumen</h3>'+esc(r.summary);const t=r.tree||{};
+ $('arb').innerHTML=`<div class="nd"><b>${esc(t.root)}</b></div>`+(t.children||[]).map(c=>`<div style="margin-left:16px"><div class="nd">${esc(c.title)}</div>${(c.items||[]).map(i=>`<div style="margin-left:22px">└ ${esc(i)}</div>`).join('')}</div>`).join('');
+ const o=Object.entries(r.venn?.only||{}),n=Math.min(3,Math.max(2,IDS.length)),P=n==2?[[110,115],[190,115]]:[[110,100],[190,100],[150,165]],col=['#1a4f9c','#7994b9','#9b111e'];
+ $('ven').innerHTML=`<svg viewBox="0 0 300 250" width="100%" role="img" aria-label="Diagrama de Venn">${IDS.slice(0,3).map((id,i)=>`<circle cx="${P[i][0]}" cy="${P[i][1]}" r="${n==2?80:70}" fill="${col[i]}" fill-opacity=".35" stroke="#fffff0"/><text x="${P[i][0]+(i==0?-38:i==1?38:0)}" y="${P[i][1]+(i==2?58:-4)}" text-anchor="middle" fill="#fffff0" font-size="12">${esc(id)}</text>`).join('')}</svg><p><b>En común:</b> ${(r.venn?.shared||[]).map(esc).join('; ')||'sin puntos claros en común'}</p>`+o.map(([k,v])=>`<p><b>Solo ${esc(k)}:</b> ${(v||[]).map(esc).join('; ')}</p>`).join('')}
+async function guardar(){const r=await api('save',{kind:'cmp',ref:IDS.join('+'),title:'Comparación '+IDS.join(' vs '),body:JSON.stringify(ULT)});toast(r.error||'Comparación guardada')}
+(async()=>{await init('comparar');lista()})();
+</script></body></html>
