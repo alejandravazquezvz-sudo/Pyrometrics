@@ -622,5 +622,39 @@ window.DATOS = [
     "url": "datos/PSI-174_paquete/01_metadata/PSI-174_metadata.txt"
    }
   ]
+ },
+ {
+  "id": "PSI-62",
+  "titulo": "Concurrent Flame Spread Modeling using Flamelet Generated Manifolds in Microgravity with Comparison to BASS Experiments using Two-Color Tomography",
+  "area": "Ciencia de la combustión / Seguridad contra incendios en naves",
+  "tipo": "Ground Investigation",
+  "objetivo": "Desarrollar y validar técnicas de modelado con flamelet generated manifolds (FGM) para la propagación concurrente de llamas en microgravedad. El proyecto busca representar el acoplamiento de transferencia de calor, transporte de masa y cinética química cerca de la interfaz sólido-vapor, usando los experimentos BASS y BASS-II como referencia. La meta a largo plazo es predecir límites de inflamabilidad de materiales de naves espaciales y aportar un modelo subgrid para simulaciones de incendios.",
+  "enfoque": "El enfoque combina simulaciones computacionales acopladas de respuestas fluido-sólido con el método unsteady flamelet generated manifold (UFGM), considerando materiales que forman carbón y sufren ablación. El método se implementó para geometrías BASS: láminas planas, esferas, varillas de PMMA y cilindros de cera.\n\nImágenes experimentales de BASS y BASS-II se procesaron con tomografía de dos colores y cámaras DSLR para reconstruir campos tridimensionales de hollín y temperatura. Las comparaciones con el modelo consideran geometría de llama, distribución de temperatura, fracción volumétrica de hollín y velocidad de propagación. También se comparó con un proyecto terrestre apoyado por NSF.",
+  "impactos": "La investigación busca mejorar la predicción de límites de inflamabilidad de materiales y el análisis de riesgos de incendio en naves espaciales y hábitats confinados. En la Tierra, los métodos pueden contribuir a modelos de combustión, normas de seguridad contra incendios y herramientas de diagnóstico y simulación.",
+  "cuando": "Del 1-may-2019 al 30-abr-2021 · liberación pública 14-nov-2025",
+  "creditos": [
+   {"nombre":"Paul E. DesJardin","rol":"Principal Investigator (PI)","institucion":"New York University, Buffalo"},
+   {"nombre":"David Urban","rol":"Project Scientist","institucion":"NASA Glenn Research Center (GRC)"},
+   {"nombre":"NASA grant 80NSSC20K0426","rol":"","institucion":"Glenn Research Center (GRC)"}
+  ],
+  "biografia": "Investigación PSI-62 sobre propagación concurrente de llamas en microgravedad mediante modelos FGM/UFGM y comparación con los experimentos BASS.",
+  "mision": "Desarrollar herramientas predictivas para evaluar la inflamabilidad de materiales y mejorar la seguridad contra incendios en vuelos espaciales; los métodos también pueden aportar a la modelación y seguridad de incendios en la Tierra.",
+  "sinopsis": "QUÉ SE HIZO\nSegún los metadatos PSI, el proyecto desarrolló y evaluó un método UFGM para simular propagación de llamas sobre combustibles sólidos en microgravedad y comparó las predicciones con experimentos BASS/BASS-II.\n\nENFOQUE\nSe modelaron sólidos con formación de carbón y ablación en geometrías como láminas, esferas, varillas de PMMA y cilindros de cera. La tomografía de dos colores de imágenes experimentales permitió reconstruir campos 3D de temperatura y hollín para comparar geometría de llama, temperatura, hollín y velocidad de propagación.\n\nALCANCE Y LÍMITES\nLos metadatos describen objetivos y métodos, pero esta ficha no incluye un informe final ni resultados cuantitativos. Consulta las publicaciones enlazadas para hallazgos y validaciones.",
+  "arbol": [
+   {"titulo":"Metadatos de investigación (ISA-Tab)","url":"datos/PSI-62/i_Investigation.txt"},
+   {"titulo":"Metadatos del estudio","url":"datos/PSI-62/s_PSI-62.txt"},
+   {"titulo":"DOI del conjunto PSI-62","url":"https://doi.org/10.60555/e9xp-ex83"},
+   {"titulo":"Publicaciones","url":"","hijos":[
+    {"titulo":"Microgravity flammability boundary for PMMA rods in axial stagnation flow (2017)","url":"https://doi.org/10.1016/j.combustflame.2017.03.001"},
+    {"titulo":"Radiative flamelet generated manifolds for solid fuel flame spread in microgravity (2023)","url":"https://doi.org/10.1016/j.combustflame.2023.112939"},
+    {"titulo":"Theoretical estimates of flammability bounds for thin condensed fuel diffusion flames in microgravity (2023)","url":"https://doi.org/10.1016/j.combustflame.2023.112910"},
+    {"titulo":"Two-color pyrometry based flame-to-fuel surface radiative heat flux diagnostic using flamelets (2021)","url":"https://doi.org/10.1016/j.combustflame.2021.111395"}
+   ]}
+  ],
+  "enfoquePuntos": [
+   "Simulación UFGM de propagación de llama concurrente, con acoplamiento fluido-sólido y materiales que forman carbón o se ablacionan.",
+   "Validación frente a imágenes BASS/BASS-II con tomografía de dos colores para reconstruir temperatura y hollín en 3D.",
+   "Comparación de geometría de llama, temperatura, hollín y velocidad de propagación, incluida la zona de inflamabilidad Goldilocks."
+  ]
  }
 ];

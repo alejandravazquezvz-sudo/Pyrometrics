@@ -622,5 +622,39 @@ window.DATOS = [
     "url": "../datos/PSI-174_paquete/01_metadata/PSI-174_metadata.txt"
    }
   ]
+ },
+ {
+  "id": "PSI-62",
+  "titulo": "Concurrent Flame Spread Modeling using Flamelet Generated Manifolds in Microgravity with Comparison to BASS Experiments using Two-Color Tomography",
+  "area": "Combustion Science / Spacecraft Fire Safety",
+  "tipo": "Ground Investigation",
+  "objetivo": "Develop and validate flamelet generated manifold (FGM) modeling techniques for concurrent flame spread in microgravity. The project addresses heat transfer, mass transport, and chemical kinetics near the solid-vapor interface, using NASA BASS and BASS-II experiments as benchmarks. Its long-term goal is to predict flammability limits of spacecraft materials and provide a subgrid-scale model for fire simulations.",
+  "enfoque": "The approach combines coupled fluid-solid simulations with the unsteady flamelet generated manifold (UFGM) method for materials that char and ablate. The method was implemented for BASS geometries including flat sheets, spheres, PMMA rods, and wax cylinders.\n\nExperimental BASS and BASS-II imagery was processed with two-color tomography using DSLR cameras to reconstruct three-dimensional soot and temperature fields. Model comparisons considered flame geometry, temperature distribution, soot volume fraction, and flame spread rate. The work also compared the approach with a parallel NSF-supported terrestrial flame-spread project.",
+  "impactos": "The research aims to improve prediction of material flammability limits and fire-risk assessment for spacecraft and confined habitats. On Earth, the methods may contribute to combustion models, fire-safety standards, and diagnostic and simulation tools.",
+  "cuando": "May 1, 2019 to Apr 30, 2021 · public release Nov 14, 2025",
+  "creditos": [
+   {"nombre":"Paul E. DesJardin","rol":"Principal Investigator (PI)","institucion":"New York University, Buffalo"},
+   {"nombre":"David Urban","rol":"Project Scientist","institucion":"NASA Glenn Research Center (GRC)"},
+   {"nombre":"NASA grant 80NSSC20K0426","rol":"","institucion":"Glenn Research Center (GRC)"}
+  ],
+  "biografia": "PSI-62 research on concurrent flame spread in microgravity using FGM/UFGM modeling and comparisons with BASS experiments.",
+  "mision": "Develop predictive tools to assess material flammability and improve fire safety in spaceflight; the methods may also support fire modeling and safety on Earth.",
+  "sinopsis": "WHAT WAS DONE\nAccording to the PSI metadata, this project developed and evaluated a UFGM method to simulate flame spread over solid fuels in microgravity and compared predictions with BASS/BASS-II experiments.\n\nAPPROACH\nThe model considered charring and ablating solids in geometries such as sheets, spheres, PMMA rods, and wax cylinders. Two-color tomography of experimental imagery reconstructed 3D temperature and soot fields to compare flame geometry, temperature, soot, and flame-spread rate.\n\nSCOPE AND LIMITS\nThe metadata describes the objectives and methods, but this record does not include a final report or quantitative results. Consult the linked publications for findings and validation details.",
+  "arbol": [
+   {"titulo":"Investigation metadata (ISA-Tab)","url":"../datos/PSI-62/i_Investigation.txt"},
+   {"titulo":"Study metadata","url":"../datos/PSI-62/s_PSI-62.txt"},
+   {"titulo":"PSI-62 dataset DOI","url":"https://doi.org/10.60555/e9xp-ex83"},
+   {"titulo":"Publications","url":"","hijos":[
+    {"titulo":"Microgravity flammability boundary for PMMA rods in axial stagnation flow (2017)","url":"https://doi.org/10.1016/j.combustflame.2017.03.001"},
+    {"titulo":"Radiative flamelet generated manifolds for solid fuel flame spread in microgravity (2023)","url":"https://doi.org/10.1016/j.combustflame.2023.112939"},
+    {"titulo":"Theoretical estimates of flammability bounds for thin condensed fuel diffusion flames in microgravity (2023)","url":"https://doi.org/10.1016/j.combustflame.2023.112910"},
+    {"titulo":"Two-color pyrometry based flame-to-fuel surface radiative heat flux diagnostic using flamelets (2021)","url":"https://doi.org/10.1016/j.combustflame.2021.111395"}
+   ]}
+  ],
+  "enfoquePuntos": [
+   "UFGM simulation of concurrent flame spread, coupling fluid-solid response and charring or ablating materials.",
+   "Validation against BASS/BASS-II imagery with two-color tomography to reconstruct 3D temperature and soot fields.",
+   "Comparison of flame geometry, temperature, soot, and flame-spread rate, including the Goldilocks flammability zone."
+  ]
  }
 ];
